@@ -31,3 +31,15 @@ final class UnexistingFileException extends HXDBException {
         super(message);
     }
 }
+
+final class ReadingFileException extends HXDBException {
+    public function new(message: String) {
+        super(message);
+    }
+}
+
+final class WritingFileException extends HXDBException {
+    public function new(message: String) {
+        super(message);
+    }
+}

@@ -1,40 +1,60 @@
 package hxdb;
 
-import haxe.Exception; // TODO: Replace me with specific exception.
-
+import hxdb.Types.SafetyLevel;
 import sys.FileSystem;
 import sys.io.File;
 
 import hxdb.Errors.UnexistingFileException;
+import hxdb.Errors.ReadingFileException;
+import hxdb.Errors.WritingFileException;
 import hxdb.Settings.WrapperSettings;
 import hxdb.Types.LogLevel;
 
-private final class LogFmt {
-    private static function readContent(path: String): String {
-        // Thinks file is 100% existing.
+final class LogFmt {
+    private static function safeRead(path: String): String {
         try {
             var buffer = File.read(path, false);
             return buffer.readAll()
                 .toString();
         } catch (exception) {
-            Logger.info('CRITICAL: Failed to read file "$path". Excetion: ${exception.toString()}');
-            throw new Exception("");
+            Logger.error('Failed to read file "$path". ${exception.toString()}');
+            throw new ReadingFileException('Failed to read file "$path". ${exception.toString()}');
         }
     }
 
-    private static function saveWrite(path: String, content: String): Void {
+    private static function safeWrite(path: String, content: String): Void {
         // TODO: Later here must be added unsafe steps.
         if (!FileSystem.exists(path)) {
-            throw new UnexistingFileException('File "$path" does not exists. Later safe solution will appear.');
+            switch (WrapperSettings.safetyLevel) {
+                case SafetyLevel.Strict:
+                    throw new UnexistingFileException('File "$path" does not exists.');
+                case SafetyLevel.Soft:
+                    Logger.warn('File "$path" not found. Creating new, with similar name...');
+                    safeCreateIfNotExists(path);
+                case SafetyLevel.Zero:
+                    Logger.warn('File "$path" not found in zero-safety level, nothing will done.');
+            }
         }
-
-        // Actually this is oversafety.
+        
         try {
-            var alreadyWritten = readContent(path);
-            File.saveContent(path, alreadyWritten + "\n" + content);
+            var alreadyWritten = safeRead(path);
+            var writingContent = alreadyWritten.length != 0
+                ? alreadyWritten + "\n" + content
+                : content;
+
+            File.saveContent(path, writingContent);
         } catch (exception) {
-            Logger.info('CRITICAL: Failed to write file "$path". Excetion: ${exception.toString()}');
-            // throw new Exception("");
+            Logger.error('Failed to write file "$path". ${exception.toString()}');
+            throw new WritingFileException('Failed to read file "$path". ${exception.toString()}');
+        }
+    }
+
+    public static function safeCreateIfNotExists(fileName: String): Void {
+        if (!FileSystem.exists(fileName)) {
+            var buffer = File.write(fileName, false);
+            buffer.close(); // Said in Std.
+
+            Logger.info('Created new file "$fileName", which content root is "${Sys.getCwd()}".');
         }
     }
 
@@ -48,7 +68,7 @@ private final class LogFmt {
 
     public static function writeToFiles(type: String, message: String): Void {
         for (fileName in WrapperSettings.logFiles) {
-            saveWrite(fileName, formatLogLine(type, message));
+            safeWrite(fileName, formatLogLine(type, message));
         }
     }
 }

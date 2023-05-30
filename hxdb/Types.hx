@@ -2,8 +2,8 @@ package hxdb;
 
 import haxe.iterators.ArrayIterator;
 import haxe.Rest;
-import sys.FileSystem;
-import sys.io.File;
+
+using hxdb.Logging.LogFmt;
 
 private final defaultLogFileName = "hxdb.log";
 
@@ -20,6 +20,7 @@ enum LogLevel {
 }
 
 final class LogFiles {
+    // Maybe here some other static-news needed?
     public static function defaultAndCustom(fileNames: Rest<String>): LogFiles {
         return new LogFiles(...fileNames.append(defaultLogFileName));
     }
@@ -29,11 +30,9 @@ final class LogFiles {
     public function new(fileNames: Rest<String>) {
         this.fileNames = fileNames.length == 0 ? [defaultLogFileName] : fileNames;
 
-        for (fileName in this.fileNames) { // Fucking "this" keyword. It's just a son of a slut!
+        for (fileName in this.fileNames) {
             // TODO: Later here must be added unsafe steps.
-            if (!FileSystem.exists(fileName)) {
-                File.write(fileName, false);
-            }
+            LogFmt.safeCreateIfNotExists(fileName);
         }
     }
 
@@ -41,7 +40,7 @@ final class LogFiles {
         // Cause type of LogFiles must be defined strictly.
         if (this.fileNames.contains(defaultLogFileName)) {
             if (this.fileNames.length == 1) {
-                return 'Default: ${this.fileNames[0]}.';
+                return 'Default: $defaultLogFileName.';
             }
 
             return 'DefaultAndCustom: ${this.fileNames.join(", ")}.';
