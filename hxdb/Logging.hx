@@ -1,6 +1,5 @@
 package hxdb;
 
-import hxdb.Types.SafetyLevel;
 import sys.FileSystem;
 import sys.io.File;
 
@@ -9,6 +8,9 @@ import hxdb.Errors.ReadingFileException;
 import hxdb.Errors.WritingFileException;
 import hxdb.Settings.WrapperSettings;
 import hxdb.Types.LogLevel;
+import hxdb.Types.SafetyLevel;
+
+final warnActiveLevels = [LogLevel.NotInfo, LogLevel.All];
 
 final class LogFmt {
     private static function safeRead(path: String): String {
@@ -17,22 +19,20 @@ final class LogFmt {
             return buffer.readAll()
                 .toString();
         } catch (exception) {
-            Logger.error('Failed to read file "$path". ${exception.toString()}');
             throw new ReadingFileException('Failed to read file "$path". ${exception.toString()}');
         }
     }
 
     private static function safeWrite(path: String, content: String): Void {
-        // TODO: Later here must be added unsafe steps.
         if (!FileSystem.exists(path)) {
             switch (WrapperSettings.safetyLevel) {
                 case SafetyLevel.Strict:
                     throw new UnexistingFileException('File "$path" does not exists.');
                 case SafetyLevel.Soft:
-                    Logger.warn('File "$path" not found. Creating new, with similar name...');
+                    ConsoleLogger.warn('File "$path" not found. Creating new, with similar name...');
                     safeCreateIfNotExists(path);
                 case SafetyLevel.Zero:
-                    Logger.warn('File "$path" not found in zero-safety level, nothing will done.');
+                    ConsoleLogger.warn('File "$path" not found in zero-safety level, nothing will done.');
             }
         }
         
@@ -44,7 +44,6 @@ final class LogFmt {
 
             File.saveContent(path, writingContent);
         } catch (exception) {
-            Logger.error('Failed to write file "$path". ${exception.toString()}');
             throw new WritingFileException('Failed to read file "$path". ${exception.toString()}');
         }
     }
@@ -54,16 +53,12 @@ final class LogFmt {
             var buffer = File.write(fileName, false);
             buffer.close(); // Said in Std.
 
-            Logger.info('Created new file "$fileName", which content root is "${Sys.getCwd()}".');
+            ConsoleLogger.info('Created new file "$fileName", which content root is "${Sys.getCwd()}".');
         }
     }
 
     public static function formatLogLine(type: String, message: String): String {
         return '${Date.now()} $type $message';
-    }
-  
-    public static function printLogLine(type: String, message: String): Void {
-        Sys.println(formatLogLine(type, message));
     }
 
     public static function writeToFiles(type: String, message: String): Void {
@@ -73,25 +68,22 @@ final class LogFmt {
     }
 }
 
-// Colors must be added later.
-final class Logger {
+final class ConsoleLogger {
     public static function info(message: String): Void {
         if (WrapperSettings.logLevel == LogLevel.All) {
-            LogFmt.printLogLine("I", message);
+            Sys.println(LogFmt.formatLogLine("I", message));
         }
     }
 
     public static function warn(message: String): Void {
-        var warnActiveLevels = [LogLevel.NotInfo, LogLevel.All];
-
         if (warnActiveLevels.contains(WrapperSettings.logLevel)) {
-            LogFmt.printLogLine("W", message);
+            Sys.println(LogFmt.formatLogLine("W", message));
         }
     }
 
     public static function error(message: String): Void {
         if (WrapperSettings.logLevel != LogLevel.Nothing) {
-            LogFmt.printLogLine("E", message);
+            Sys.println(LogFmt.formatLogLine("E", message));
         }
     }
 }
@@ -104,8 +96,6 @@ final class FileLogger {
     }
 
     public static function warn(message: String): Void {
-        var warnActiveLevels = [LogLevel.NotInfo, LogLevel.All];
-
         if (warnActiveLevels.contains(WrapperSettings.logLevel)) {
             LogFmt.writeToFiles("W", message);
         }
@@ -115,5 +105,23 @@ final class FileLogger {
         if (WrapperSettings.logLevel != LogLevel.Nothing) {
             LogFmt.writeToFiles("E", message);
         }
+    }
+}
+
+// To avoid double calls.
+final class GeneralLogger {
+    public static function info(message: String): Void {
+        ConsoleLogger.info(message);
+        FileLogger.info(message);
+    }
+
+    public static function warn(message: String): Void {
+        ConsoleLogger.warn(message);
+        FileLogger.warn(message);
+    }
+
+    public static function error(message: String): Void {
+        ConsoleLogger.error(message);
+        FileLogger.error(message);
     }
 }

@@ -4,7 +4,12 @@ import haxe.ds.GenericStack;
 
 import hxdb.Errors.AlreadyConnectedException;
 import hxdb.Errors.MissingConnectionException;
+import hxdb.Errors.UnsafeConnectionUpdateException;
+import hxdb.Logging.ConsoleLogger;
+import hxdb.Logging.GeneralLogger;
+import hxdb.Settings.WrapperSettings;
 import hxdb.Types.ConnectionMode;
+import hxdb.Types.SafetyLevel;
 
 final class Connection {
     public final fileName: String;
@@ -15,10 +20,20 @@ final class Connection {
 
         this.fileName = fileName;
         this.mode = mode;
+
+        Connections.add(this);
+    }
+
+    public function query(): Void {
+
+    }
+
+    public function terminate(): Void {
+
     }
 
     public function toString(): String {
-        return 'File "$fileName", mode: "$mode".';
+        return '("$fileName": $mode)';
     }
 
     @:op(A == B)
@@ -39,10 +54,12 @@ final class Connections {
         }
 
         store.add(connection);
+        GeneralLogger.info('Successfully created connection: $connection.');
     }
 
     public static function del(connection: Connection): Void {
         store.remove(connection);
+        GeneralLogger.info('Successfully deleted connection: $connection.');
     }
 
     public static function get(fileName: String): Connection {
@@ -56,9 +73,28 @@ final class Connections {
     public static function update(connection: Connection): Void {
         if (exists(connection.fileName, true)) {
             if (bufferedConnection == connection) {
-            
+                return ConsoleLogger.info('Connection similar to $connection already exists. Passing.');
             }
+
+            switch (WrapperSettings.safetyLevel) {
+                case SafetyLevel.Strict:
+                    if (bufferedConnection.mode == ConnectionMode.Writable) {
+                        throw new UnsafeConnectionUpdateException(
+                            "It's unsafe to override connection with \"Writable\" mode."
+                        );
+                    }
+                case SafetyLevel.Soft:
+                case SafetyLevel.Zero:
+                    if (bufferedConnection.mode == ConnectionMode.Writable) {
+                        ConsoleLogger.warn("It's unsafe to override connection with \"Writable\" mode.");
+                    }
+            }
+
+            store.add(connection);
+            GeneralLogger.info('Successfully updated connection: $connection.');
         }
+
+        throw new MissingConnectionException('Connection with file "${connection.fileName}" not found.');
     }
 
     public static function exists(fileName: String, writeToBuffer: Bool = false): Bool {
@@ -73,5 +109,10 @@ final class Connections {
         }
 
         return false;
+    }
+
+    @:deprecated
+    public static function toString(): String {
+        return '$store | $bufferedConnection';
     }
 }

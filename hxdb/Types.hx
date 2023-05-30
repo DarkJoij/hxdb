@@ -19,6 +19,12 @@ enum LogLevel {
     Nothing;
 }
 
+enum SafetyLevel {
+    Strict;
+    Soft;
+    Zero;
+}
+
 final class LogFiles {
     // Maybe here some other static-news needed?
     public static function defaultAndCustom(fileNames: Rest<String>): LogFiles {
@@ -31,32 +37,23 @@ final class LogFiles {
         this.fileNames = fileNames.length == 0 ? [defaultLogFileName] : fileNames;
 
         for (fileName in this.fileNames) {
-            // TODO: Later here must be added unsafe steps.
             LogFmt.safeCreateIfNotExists(fileName);
         }
     }
 
     public function toString(): String {
-        // Cause type of LogFiles must be defined strictly.
-        if (this.fileNames.contains(defaultLogFileName)) {
-            if (this.fileNames.length == 1) {
+        if (fileNames.contains(defaultLogFileName)) {
+            if (fileNames.length == 1) {
                 return 'Default: $defaultLogFileName.';
             }
 
-            return 'DefaultAndCustom: ${this.fileNames.join(", ")}.';
+            return 'DefaultAndCustom: ${fileNames.join(", ")}.';
         }
 
-        return 'Custom: ${this.fileNames.join(", ")}.';
+        return 'Custom: ${fileNames.join(", ")}.';
     }
 
     public inline function iterator(): ArrayIterator<String> {
         return fileNames.iterator();
     }
-}
-
-// Not implemented fully.
-enum SafetyLevel {
-    Strict;
-    Soft;
-    Zero;
 }
