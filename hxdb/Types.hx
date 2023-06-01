@@ -25,6 +25,13 @@ enum SafetyLevel {
     Zero;
 }
 
+
+enum ExecutionResult {
+    Success;
+    Undefined(object: Any);
+    Error(message: String);
+}
+
 final class LogFiles {
     // Maybe here some other static-news needed?
     public static function defaultAndCustom(fileNames: Rest<String>): LogFiles {
@@ -33,7 +40,7 @@ final class LogFiles {
 
     public final fileNames: Array<String>;
 
-    public function new(fileNames: Rest<String>) {
+    public inline function new(fileNames: Rest<String>) {
         this.fileNames = fileNames.length == 0 ? [defaultLogFileName] : fileNames;
 
         for (fileName in this.fileNames) {

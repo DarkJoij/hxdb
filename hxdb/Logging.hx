@@ -32,7 +32,7 @@ final class LogFmt {
                     ConsoleLogger.warn('File "$path" not found. Creating new, with similar name...');
                     safeCreateIfNotExists(path);
                 case SafetyLevel.Zero:
-                    ConsoleLogger.warn('File "$path" not found in zero-safety level, nothing will done.');
+                    return ConsoleLogger.warn('File "$path" not found in zero-safety level, nothing will done.');
             }
         }
         

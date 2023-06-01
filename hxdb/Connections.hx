@@ -1,17 +1,23 @@
-package hxdb.driver;
+package hxdb;
 
 import haxe.ds.GenericStack;
 
+import hxdb.driver.QueryEntry.Executor;
 import hxdb.Errors.AlreadyConnectedException;
+import hxdb.Errors.HXDBException;
 import hxdb.Errors.MissingConnectionException;
+import hxdb.Errors.UsingTerminatedConnection;
 import hxdb.Errors.UnsafeConnectionUpdateException;
 import hxdb.Logging.ConsoleLogger;
 import hxdb.Logging.GeneralLogger;
 import hxdb.Settings.WrapperSettings;
 import hxdb.Types.ConnectionMode;
 import hxdb.Types.SafetyLevel;
+import hxdb.Types.ExecutionResult;
 
 final class Connection {
+    private var isTerminated: Bool = false;
+
     public final fileName: String;
     public final mode: ConnectionMode;
     
@@ -21,15 +27,31 @@ final class Connection {
         this.fileName = fileName;
         this.mode = mode;
 
-        Connections.add(this);
+        ConnectionsStore.add(this);
     }
 
-    public function query(): Void {
+    public function query(query: String): Void {
+        if (isTerminated) {
+            throw new UsingTerminatedConnection('Using terminated connection ($this).');
+        }
 
+        var result = Executor.execute(query);
+        
+        switch (result) {
+            case ExecutionResult.Undefined(some):
+                GeneralLogger.warn('Result of execution is $result. Recieved object: $some.');
+            case ExecutionResult.Error(message):
+                throw new HXDBException(message);
+            case ExecutionResult.Success:
+                GeneralLogger.info('Successfully executed query: "$query".');
+        }
     }
 
     public function terminate(): Void {
+        ConnectionsStore.del(this);
+        this.isTerminated = true;
 
+        GeneralLogger.info('Connection $this terminated.');
     }
 
     public function toString(): String {
@@ -42,7 +64,7 @@ final class Connection {
     }
 }
 
-final class Connections {
+final class ConnectionsStore {
     private static var bufferedConnection: Connection;
     private static final store: GenericStack<Connection> = new GenericStack();
 
@@ -76,18 +98,16 @@ final class Connections {
                 return ConsoleLogger.info('Connection similar to $connection already exists. Passing.');
             }
 
-            switch (WrapperSettings.safetyLevel) {
-                case SafetyLevel.Strict:
-                    if (bufferedConnection.mode == ConnectionMode.Writable) {
-                        throw new UnsafeConnectionUpdateException(
-                            "It's unsafe to override connection with \"Writable\" mode."
-                        );
-                    }
-                case SafetyLevel.Soft:
-                case SafetyLevel.Zero:
-                    if (bufferedConnection.mode == ConnectionMode.Writable) {
-                        ConsoleLogger.warn("It's unsafe to override connection with \"Writable\" mode.");
-                    }
+            if (bufferedConnection.mode == ConnectionMode.Writable) {
+                var message = "It's unsafe to override connection with \"Writable\" mode.";
+
+                switch (WrapperSettings.safetyLevel) {
+                    case SafetyLevel.Strict:
+                        throw new UnsafeConnectionUpdateException(message);
+                    case SafetyLevel.Soft:
+                    case SafetyLevel.Zero:
+                        ConsoleLogger.warn(message);
+                }
             }
 
             store.add(connection);
@@ -109,10 +129,5 @@ final class Connections {
         }
 
         return false;
-    }
-
-    @:deprecated
-    public static function toString(): String {
-        return '$store | $bufferedConnection';
     }
 }

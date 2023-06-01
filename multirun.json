@@ -1,0 +1,5 @@
+{
+	"run": "haxe -main hxdb/Main.hx --interp",
+	"run-cpp": "mr build-cpp && .\\dist\\Main.exe",
+	"build-cpp": "haxe -main hxdb/Main.hx -cpp dist"
+}

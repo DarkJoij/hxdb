@@ -27,7 +27,6 @@ final class WrapperSettings {
         setSafetyLevel(SafetyLevel.Strict);
     }
 
-    @:deprecated
     public static function toString(): String {
         return 'logLevel: $logLevel\nlogFiles: $logFiles\nsafetyLevel: $safetyLevel';
     }

@@ -1,7 +1,6 @@
 package hxdb;
 
-import hxdb.driver.Connections.Connections;
-import hxdb.driver.Connections.Connection;
+import hxdb.Connections.Connection;
 import hxdb.Logging.ConsoleLogger;
 import hxdb.Settings.WrapperSettings;
 import hxdb.Types.ConnectionMode;
@@ -14,11 +13,9 @@ function prepare(): Void {
 
 final class Main {
     public static function main(): Void {
-        prepare();
+        prepare(); 
 
         new Connection("mydb.hxdb");
         new Connection("anotherdb.hxdb", ConnectionMode.Writable);
-
-        Sys.println(Connections);
     }
 }

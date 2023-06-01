@@ -4,9 +4,9 @@ import haxe.Exception;
 
 import hxdb.Logging.GeneralLogger;
 
-private class HXDBException extends Exception {
+class HXDBException extends Exception {
     public function new(message: String) {
-        GeneralLogger.error('Uncaught exception: $message');
+        GeneralLogger.error('CRITICAL: Uncaught exception: $message');
         super(message);
     }
 }
@@ -48,6 +48,12 @@ final class WritingFileException extends HXDBException {
 }
 
 final class UnsafeConnectionUpdateException extends HXDBException {
+    public function new(message: String) {
+        super(message);
+    }
+}
+
+final class UsingTerminatedConnection extends HXDBException {
     public function new(message: String) {
         super(message);
     }
