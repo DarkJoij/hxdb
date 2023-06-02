@@ -10,7 +10,7 @@ import hxdb.Settings.WrapperSettings;
 import hxdb.Types.LogLevel;
 import hxdb.Types.SafetyLevel;
 
-final warnActiveLevels = [LogLevel.NotInfo, LogLevel.All];
+private final warnActiveLevels = [LogLevel.NotInfo, LogLevel.All];
 
 final class LogFmt {
     private static function safeRead(path: String): String {
@@ -51,7 +51,7 @@ final class LogFmt {
     public static function safeCreateIfNotExists(fileName: String): Void {
         if (!FileSystem.exists(fileName)) {
             var buffer = File.write(fileName, false);
-            buffer.close(); // Said in Std.
+            buffer.close();
 
             ConsoleLogger.info('Created new file "$fileName", which content root is "${Sys.getCwd()}".');
         }
@@ -108,7 +108,6 @@ final class FileLogger {
     }
 }
 
-// To avoid double calls.
 final class GeneralLogger {
     public static function info(message: String): Void {
         ConsoleLogger.info(message);

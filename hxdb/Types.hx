@@ -2,10 +2,11 @@ package hxdb;
 
 import haxe.iterators.ArrayIterator;
 import haxe.Rest;
+import sys.io.File;
 
-using hxdb.Logging.LogFmt;
+import hxdb.Logging.LogFmt;
 
-private final defaultLogFileName = "hxdb.log";
+final defaultLogFileName = "hxdb.log";
 
 enum ConnectionMode {
     Readable;
@@ -25,7 +26,6 @@ enum SafetyLevel {
     Zero;
 }
 
-
 enum ExecutionResult {
     Success;
     Undefined(object: Any);
@@ -33,7 +33,6 @@ enum ExecutionResult {
 }
 
 final class LogFiles {
-    // Maybe here some other static-news needed?
     public static function defaultAndCustom(fileNames: Rest<String>): LogFiles {
         return new LogFiles(...fileNames.append(defaultLogFileName));
     }
@@ -45,6 +44,7 @@ final class LogFiles {
 
         for (fileName in this.fileNames) {
             LogFmt.safeCreateIfNotExists(fileName);
+            File.saveContent(fileName, ""); // TODO: Must be checked.
         }
     }
 

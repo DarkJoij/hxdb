@@ -6,8 +6,8 @@ import hxdb.Settings.WrapperSettings;
 import hxdb.Types.ConnectionMode;
 
 function prepare(): Void {
-    WrapperSettings.loadDefault();
-    
+    WrapperSettings.loadDefault(); // Using default settings - the best way.
+
     ConsoleLogger.info("Logging stuff loaded. Loading database system...");
 }
 
@@ -16,6 +16,6 @@ final class Main {
         prepare(); 
 
         new Connection("mydb.hxdb");
-        new Connection("anotherdb.hxdb", ConnectionMode.Writable);
+        new Connection("mydb.hxdb", ConnectionMode.Writable);
     }
 }

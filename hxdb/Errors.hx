@@ -6,8 +6,10 @@ import hxdb.Logging.GeneralLogger;
 
 class HXDBException extends Exception {
     public function new(message: String) {
-        GeneralLogger.error('CRITICAL: Uncaught exception: $message');
-        super(message);
+        var msg = 'CRITICAL: $message';
+
+        GeneralLogger.error(msg);
+        super(msg);
     }
 }
 
@@ -47,7 +49,7 @@ final class WritingFileException extends HXDBException {
     }
 }
 
-final class UnsafeConnectionUpdateException extends HXDBException {
+final class UnsafeUpdatingException extends HXDBException {
     public function new(message: String) {
         super(message);
     }
