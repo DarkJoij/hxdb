@@ -77,7 +77,7 @@ final class ConnectionsStore {
     public static function add(connection: Connection): Void {
         if (exists(connection.fileName)) {
             throw new AlreadyConnectedException(
-                'Connection with file "${connection.fileName}" already exists. Use "update" method instead.'
+                'Connection with file "${connection.fileName}" already exists.'
             );
         }
 

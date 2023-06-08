@@ -6,7 +6,7 @@ import sys.io.File;
 
 import hxdb.Logging.LogFmt;
 
-final defaultLogFileName = "hxdb.log";
+private final defaultLogFileName = "hxdb.log";
 
 enum ConnectionMode {
     Readable;
@@ -49,15 +49,17 @@ final class LogFiles {
     }
 
     public function toString(): String {
+        var sequence = fileNames.join(", ");
+
         if (fileNames.contains(defaultLogFileName)) {
             if (fileNames.length == 1) {
                 return 'Default: $defaultLogFileName.';
             }
 
-            return 'DefaultAndCustom: ${fileNames.join(", ")}.';
+            return 'DefaultAndCustom: $sequence.';
         }
 
-        return 'Custom: ${fileNames.join(", ")}.';
+        return 'Custom: $sequence.';
     }
 
     public inline function iterator(): ArrayIterator<String> {
