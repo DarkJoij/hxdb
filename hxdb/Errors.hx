@@ -55,7 +55,13 @@ final class UnsafeUpdatingException extends HXDBException {
     }
 }
 
-final class UsingTerminatedConnection extends HXDBException {
+final class UsingTerminatedConnectionException extends HXDBException {
+    public function new(message: String) {
+        super(message);
+    }
+}
+
+final class CharTypeException extends HXDBException {
     public function new(message: String) {
         super(message);
     }

@@ -23,7 +23,7 @@ final class WrapperSettings {
 
     public static function loadDefault(): Void {
         setLogLevel(LogLevel.All);
-        setLogFiles(new LogFiles());
+        setLogFiles(LogFiles.def());
         setSafetyLevel(SafetyLevel.Strict);
     }
 

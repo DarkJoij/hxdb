@@ -6,8 +6,8 @@ import hxdb.driver.QueryEntry.Executor;
 import hxdb.Errors.AlreadyConnectedException;
 import hxdb.Errors.HXDBException;
 import hxdb.Errors.MissingConnectionException;
-import hxdb.Errors.UsingTerminatedConnection;
 import hxdb.Errors.UnsafeUpdatingException;
+import hxdb.Errors.UsingTerminatedConnectionException;
 import hxdb.Logging.ConsoleLogger;
 import hxdb.Logging.GeneralLogger;
 import hxdb.Settings.WrapperSettings;
@@ -29,7 +29,7 @@ private class Mask {
     }
 
     @:op(A == B)
-    public function eq(other: Mask): Bool {
+    public function eq(other: Mask): Bool { 
         return fileName == other.fileName && mode == other.mode;
     }
 }
@@ -49,7 +49,12 @@ final class Connection extends Mask {
 
     public function query(query: String): Void {
         if (isTerminated) {
-            throw new UsingTerminatedConnection('Using terminated connection ($this).');
+            switch (WrapperSettings.safetyLevel) {
+                case SafetyLevel.Strict:
+                    throw new UsingTerminatedConnectionException('Using terminated connection $this.');
+                case SafetyLevel.Soft | SafetyLevel.Zero:
+                    GeneralLogger.warn('Using terminated connection $this was rejected.');
+            }
         }
         
         switch (Executor.execute(query)) {
@@ -110,8 +115,7 @@ final class ConnectionsStore {
                 switch (WrapperSettings.safetyLevel) {
                     case SafetyLevel.Strict:
                         throw new UnsafeUpdatingException(message);
-                    case SafetyLevel.Soft:
-                    case SafetyLevel.Zero:
+                    case SafetyLevel.Soft | SafetyLevel.Zero:
                         ConsoleLogger.warn(message);
                 }
             }
