@@ -1,19 +1,19 @@
-package hxdb;
+package hxdb.frontend;
 
 import haxe.ds.GenericStack;
 
-import hxdb.driver.QueryEntry.Executor;
-import hxdb.Errors.AlreadyConnectedException;
-import hxdb.Errors.HXDBException;
-import hxdb.Errors.MissingConnectionException;
-import hxdb.Errors.UnsafeUpdatingException;
-import hxdb.Errors.UsingTerminatedConnectionException;
-import hxdb.Logging.ConsoleLogger;
-import hxdb.Logging.GeneralLogger;
-import hxdb.Settings.WrapperSettings;
-import hxdb.Types.ConnectionMode;
-import hxdb.Types.SafetyLevel;
-import hxdb.Types.ExecutionResult;
+import hxdb.backend.QueryEntry.Executor;
+import hxdb.frontend.Errors.AlreadyConnectedException;
+import hxdb.frontend.Errors.HXDBException;
+import hxdb.frontend.Errors.MissingConnectionException;
+import hxdb.frontend.Errors.UnsafeUpdatingException;
+import hxdb.frontend.Errors.UsingTerminatedConnectionException;
+import hxdb.frontend.Logging.ConsoleLogger;
+import hxdb.frontend.Logging.GeneralLogger;
+import hxdb.frontend.Settings.WrapperSettings;
+import hxdb.frontend.Types.ConnectionMode;
+import hxdb.frontend.Types.SafetyLevel;
+import hxdb.frontend.Types.ExecutionResult;
 
 private class Mask {
     public final fileName: String;
@@ -38,13 +38,13 @@ final class Connection extends Mask {
     private var isTerminated: Bool = false;
     
     public function new(fileName: String, ?mode: ConnectionMode) {
-        mode ??= ConnectionMode.Readable;
+        super(fileName, mode ?? ConnectionMode.Readable);
 
-        super(fileName, mode);
+        if (ConnectionsStore.exists(fileName)) {
+            return ConnectionsStore.update(this);
+        }
 
-        ConnectionsStore.exists(fileName) 
-            ? ConnectionsStore.update(this)
-            : ConnectionsStore.add(this);
+        ConnectionsStore.add(this);
     }
 
     public function query(query: String): Void {

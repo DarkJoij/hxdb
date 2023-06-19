@@ -1,8 +1,8 @@
-package hxdb;
+package hxdb.frontend;
 
 import haxe.Exception;
 
-import hxdb.Logging.GeneralLogger;
+import hxdb.frontend.Logging.GeneralLogger;
 
 class HXDBException extends Exception {
     public function new(message: String) {
@@ -62,6 +62,12 @@ final class UsingTerminatedConnectionException extends HXDBException {
 }
 
 final class CharTypeException extends HXDBException {
+    public function new(message: String) {
+        super(message);
+    }
+}
+
+final class UnknownLexingException extends HXDBException {
     public function new(message: String) {
         super(message);
     }

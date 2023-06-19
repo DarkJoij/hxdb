@@ -1,9 +1,9 @@
 package hxdb;
 
-import hxdb.driver.Stream.Char;
-import hxdb.Logging.ConsoleLogger;
-import hxdb.Settings.WrapperSettings;
-import hxdb.Types.LogLevel;
+import hxdb.backend.Tokenizer.Lexer;
+import hxdb.frontend.Logging.ConsoleLogger;
+import hxdb.frontend.Settings.WrapperSettings;
+import hxdb.frontend.Types.LogLevel;
 
 function prepare(): Void {
     WrapperSettings.loadDefault();
@@ -16,16 +16,9 @@ final class Main {
     public static function main(): Void {
         prepare(); 
         
-        var tabC = new Char(9);
-        var rEscC = new Char(13);
-        var spaceC = new Char(32);
+        var lexer = new Lexer("SELECT");
+        var tokens = lexer.lex();
 
-        var tab = "	";
-        var rEsc = "\r";
-        var space = " ";
-
-        Sys.println(tabC == tab.charCodeAt(0));
-        Sys.println(rEscC == rEsc.charCodeAt(0));
-        Sys.println(spaceC == space.charCodeAt(0));
+        Sys.println(tokens);
     }
 }

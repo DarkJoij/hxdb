@@ -1,10 +1,10 @@
-package hxdb;
+package hxdb.frontend;
 
 import haxe.iterators.ArrayIterator;
 import haxe.Rest;
 import sys.io.File;
 
-import hxdb.Logging.LogFmt;
+import hxdb.frontend.Logging.LogFmt;
 
 private final defaultLogFileName = "hxdb.log";
 
@@ -33,12 +33,12 @@ enum ExecutionResult {
 }
 
 abstract LogFiles(Array<String>) {
-    public static function def(): Array<String> {
-        return [defaultLogFileName];
+    public static function def(): LogFiles {
+        return new LogFiles([defaultLogFileName]);
     }
 
-    public static function defaultAndCustom(fileNames: Rest<String>): Array<String> {
-        return fileNames.append(defaultLogFileName);
+    public static function defaultAndCustom(fileNames: Rest<String>): LogFiles {
+        return new LogFiles(fileNames.append(defaultLogFileName));
     }
 
     @:from

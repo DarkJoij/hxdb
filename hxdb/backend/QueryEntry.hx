@@ -1,6 +1,6 @@
-package hxdb.driver;
+package hxdb.backend;
 
-import hxdb.Types.ExecutionResult;
+import hxdb.frontend.Types.ExecutionResult;
 
 final class Executor {
     public static function execute(query: String): ExecutionResult {

@@ -1,8 +1,8 @@
-package hxdb;
+package hxdb.frontend;
 
-import hxdb.Types.LogLevel;
-import hxdb.Types.LogFiles;
-import hxdb.Types.SafetyLevel;
+import hxdb.frontend.Types.LogLevel;
+import hxdb.frontend.Types.LogFiles;
+import hxdb.frontend.Types.SafetyLevel;
 
 final class WrapperSettings {
     public static var logLevel(default, null): LogLevel;

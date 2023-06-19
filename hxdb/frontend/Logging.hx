@@ -1,14 +1,14 @@
-package hxdb;
+package hxdb.frontend;
 
 import sys.FileSystem;
 import sys.io.File;
 
-import hxdb.Errors.UnexistingFileException;
-import hxdb.Errors.ReadingFileException;
-import hxdb.Errors.WritingFileException;
-import hxdb.Settings.WrapperSettings;
-import hxdb.Types.LogLevel;
-import hxdb.Types.SafetyLevel;
+import hxdb.frontend.Errors.UnexistingFileException;
+import hxdb.frontend.Errors.ReadingFileException;
+import hxdb.frontend.Errors.WritingFileException;
+import hxdb.frontend.Settings.WrapperSettings;
+import hxdb.frontend.Types.LogLevel;
+import hxdb.frontend.Types.SafetyLevel;
 
 private final warnActiveLevels = [LogLevel.NotInfo, LogLevel.All];
 
@@ -19,7 +19,7 @@ final class LogFmt {
             return buffer.readAll()
                 .toString();
         } catch (exception) {
-            throw new ReadingFileException('Failed to read file "$path". ${exception.toString()}');
+            throw new ReadingFileException('Failed to read file "$path". $exception');
         }
     }
 
@@ -38,13 +38,15 @@ final class LogFmt {
         
         try {
             var alreadyWritten = safeRead(path);
-            var writingContent = alreadyWritten.length != 0
-                ? alreadyWritten + "\n" + content
-                : content;
+            var writingContent = content;
+
+            if (alreadyWritten.length != 0) {
+                writingContent = alreadyWritten + "\n" + content;
+            }
 
             File.saveContent(path, writingContent);
         } catch (exception) {
-            throw new WritingFileException('Failed to read file "$path". ${exception.toString()}');
+            throw new WritingFileException('Failed to read file "$path". $exception');
         }
     }
 

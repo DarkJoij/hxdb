@@ -1,6 +1,6 @@
-package hxdb.driver;
+package hxdb.backend;
 
-import hxdb.Errors.CharTypeException;
+import hxdb.frontend.Errors.CharTypeException;
 
 abstract Char(Int) {
     @:from
@@ -15,6 +15,11 @@ abstract Char(Int) {
     @:to
     public function toString(): String {
         return String.fromCharCode(this);
+    }
+
+    @:to
+    public function toInt(): Int {
+        return this;
     }
 
     public inline function new(code: Int) {
